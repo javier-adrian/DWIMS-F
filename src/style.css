@@ -1,0 +1,241 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#f4f8f5] text-gray-900 antialiased;
+    font-family: 'Outfit', sans-serif !important;
+  }
+
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20;
+  }
+
+  ::selection {
+    @apply bg-[#005825]/20 text-gray-900;
+  }
+}
+
+:root {
+  --primary: #005825;
+  --primary-hover: #004a1f;
+  --accent: #ffd84d;
+}
+
+@layer utilities {
+  .glass-card {
+    @apply bg-white/65 border border-white/80 backdrop-blur-xl shadow-lg;
+  }
+
+  .ui-page-shell {
+    @apply max-w-7xl mx-auto fade-slide-up pb-12 space-y-8;
+  }
+
+  .ui-interior-wrap {
+    @apply relative;
+  }
+
+  .ui-interior-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+  }
+
+  .ui-interior-wrap> :not(.fixed) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .ui-modal-shell {
+    @apply fixed inset-0 z-[220] items-center justify-center p-4 sm:p-6;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(10px);
+    display: none !important;
+  }
+
+  .ui-modal-shell:not(.hidden) {
+    display: flex !important;
+  }
+
+  .ui-modal-panel {
+    @apply relative w-full max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-3xl border border-white rounded-[32px];
+    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.35);
+  }
+
+  .ui-label {
+    @apply block text-[11px] font-black text-gray-500 uppercase tracking-[2px] mb-2 px-1;
+  }
+
+  .ui-surface {
+    @apply bg-white/85 border border-white/90 backdrop-blur-xl shadow-lg;
+  }
+
+  .ui-card {
+    @apply ui-surface rounded-2xl;
+  }
+
+  .ui-section-card {
+    @apply ui-surface rounded-[28px];
+    box-shadow: 0 18px 45px -20px rgba(0, 88, 37, 0.35);
+  }
+
+  /* Force Primary Color Overrides */
+  .bg-primary,
+  .bg-emerald-600,
+  .bg-green-600,
+  .bg-emerald-500,
+  .bg-green-500 {
+    background-color: #005825 !important;
+  }
+
+  .text-primary,
+  .text-emerald-600,
+  .text-green-600,
+  .text-emerald-500,
+  .text-green-500 {
+    color: #005825 !important;
+  }
+
+  .border-primary,
+  .border-emerald-600,
+  .border-green-600,
+  .border-emerald-500,
+  .border-green-500 {
+    border-color: #005825 !important;
+  }
+
+  .ui-button-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-bold transition-all shadow-lg shadow-primary/20 hover:bg-primary-hover hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20;
+  }
+
+  .ui-button-soft {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-primary/10 text-primary font-semibold transition-all hover:bg-primary/15 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/20;
+  }
+
+  .ui-input {
+    @apply w-full rounded-lg border border-gray-200 bg-white/90 text-sm text-gray-800 transition-all focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-primary/10;
+  }
+
+  .ui-input-lg {
+    @apply ui-input px-5 py-3.5 text-[14px] font-semibold;
+  }
+
+  .ui-page-title {
+    @apply text-3xl md:text-4xl font-black text-gray-900 tracking-tight leading-tight;
+  }
+
+  .ui-muted {
+    @apply text-sm text-gray-500 leading-relaxed;
+  }
+
+  .ui-tag {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest;
+  }
+
+  .ui-card table thead th,
+  .ui-section-card table thead th {
+    @apply text-gray-500;
+  }
+
+  .ui-card table tbody tr,
+  .ui-section-card table tbody tr {
+    @apply transition-colors;
+  }
+
+  .ui-card table tbody tr:hover,
+  .ui-section-card table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.45);
+  }
+
+  /* Utility Animations */
+  .fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+  }
+
+  .fade-slide-up {
+    animation: fadeSlideUp 0.6s ease-out forwards;
+  }
+
+  /* Legacy glass system preserved ONLY for Auth pages as per user preference */
+  .glass-panel {
+    @apply bg-white/45 border border-white/50 backdrop-blur-[20px];
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Base Styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a0aec0;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 88, 37, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 88, 37, 0.4);
+}
