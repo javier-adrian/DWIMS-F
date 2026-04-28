@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_API_URL; // Update this to match backend ASP.NET URL
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://api.kld-dwims.tech'; // Update this to match backend ASP.NET URL
 
 export function getToken() {
   return localStorage.getItem('dwims_token');
