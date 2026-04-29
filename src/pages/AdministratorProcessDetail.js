@@ -20,8 +20,12 @@ export const AdministratorProcessDetail = {
             </div>
           </div>
         </div>
-
-
+        
+        <div class="flex items-center gap-4">
+            <button id="deleteProcessBtn" class="flex items-center gap-3 px-6 py-4 rounded-2xl bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all text-[14px] font-black shadow-sm">
+                <i class="fa-solid fa-trash-can"></i> Delete Workflow
+            </button>
+        </div>
       </div>
 
       <!-- MAIN CANVAS -->
@@ -441,5 +445,24 @@ export const AdministratorProcessDetail = {
       } catch (err) { alert(err.message); }
       finally { finalizeBtn.disabled = false; finalizeBtn.innerHTML = initial; }
     };
+
+    const deleteBtn = document.getElementById('deleteProcessBtn');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', async () => {
+        if (confirm('Are you sure you want to completely delete this workflow? This action cannot be undone.')) {
+          const initial = deleteBtn.innerHTML;
+          deleteBtn.disabled = true;
+          deleteBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting...';
+          try {
+            await api.deleteProcess(processId);
+            window.location.hash = '#/admin/documents';
+          } catch (err) {
+            alert('Failed to delete workflow: ' + err.message);
+            deleteBtn.disabled = false;
+            deleteBtn.innerHTML = initial;
+          }
+        }
+      });
+    }
   }
 };
