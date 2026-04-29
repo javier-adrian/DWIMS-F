@@ -83,75 +83,81 @@ export const SuperAdminDepartmentDetail = {
         </div>
       </div>
     </div>
-
-    <!-- MODAL: ADD MEMBER -->
-    <div id="addMemberModal" class="hidden ui-modal-shell">
-        <div class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity" id="closeMemberModalBg"></div>
-        <div class="ui-modal-panel max-w-lg overflow-hidden transform transition-all scale-95 opacity-0 duration-300 translate-y-4" id="memberModalContent">
-            <div class="p-10 lg:p-14">
-                <div class="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-inner">
-                    <i class="fa-solid fa-user-link"></i>
-                </div>
-                <h3 class="text-[28px] font-black text-gray-900 leading-tight mb-2">Integrate Member</h3>
-                <p class="text-[14px] text-gray-500 font-medium mb-10 italic opacity-70">Attach an institutional identity to this departmental node.</p>
-                
-                <form id="addMemberForm" class="space-y-8">
-                  <div class="group">
-                    <label class="ui-label group-hover:text-primary transition-colors">Personnel Email</label>
-                    <input id="memberEmail" type="email" class="ui-input-lg w-full" placeholder="user@kld.edu.ph" required>
-                  </div>
-                  
-                  <div class="group">
-                    <label class="ui-label group-hover:text-primary transition-colors">Authorization Level</label>
-                    <select id="memberRole" class="ui-input-lg w-full cursor-pointer">
-                      <option value="0">TIER-0 &middot; Standard Submitter</option>
-                      <option value="1" selected>TIER-1 &middot; Department Reviewer</option>
-                      <option value="2">TIER-2 &middot; Process Administrator</option>
-                    </select>
-                  </div>
-                </form>
-            </div>
-            
-            <div class="px-10 py-8 bg-gray-50/50 border-t border-gray-100 flex items-center justify-end gap-4">
-                <button id="closeMemberModalBtn" class="text-[12px] font-black text-gray-400 p-4 hover:text-gray-900 uppercase tracking-widest transition-all">Discard</button>
-                <button id="saveMemberBtn" class="ui-button-primary px-10 py-4 text-[15px]">
-                    <i class="fa-solid fa-link text-lg opacity-70"></i> Commit Integration
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: ADD PROCESS -->
-    <div id="addProcessModal" class="hidden ui-modal-shell">
-        <div class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity" id="closeProcessModalBg"></div>
-        <div class="ui-modal-panel max-w-lg overflow-hidden transform transition-all scale-95 opacity-0 duration-300 translate-y-4" id="processModalContent">
-            <div class="p-10 lg:p-14">
-                <div class="w-16 h-16 bg-emerald-500/10 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-inner">
-                    <i class="fa-solid fa-route"></i>
-                </div>
-                <h3 class="text-[28px] font-black text-gray-900 leading-tight mb-2">Scope Protocol</h3>
-                <p class="text-[14px] text-gray-500 font-medium mb-10 italic opacity-70">Define a new operational framework for this organizational node.</p>
-                
-                <form id="addProcessForm" class="space-y-8">
-                  <div class="group">
-                    <label class="ui-label group-hover:text-primary transition-colors">Protocol Nomenclature</label>
-                    <input id="processTitle" type="text" class="ui-input-lg w-full" placeholder="e.g. Clearance Review" required>
-                  </div>
-                </form>
-            </div>
-            
-            <div class="px-10 py-8 bg-gray-50/50 border-t border-gray-100 flex items-center justify-end gap-4">
-                <button id="closeProcessModalBtn" class="text-[12px] font-black text-gray-400 p-4 hover:text-gray-900 uppercase tracking-widest transition-all">Abort</button>
-                <button id="saveProcessBtn" class="ui-button-primary px-10 py-4 text-[15px]">
-                    <i class="fa-solid fa-diagram-project text-lg opacity-70"></i> Commit Protocol
-                </button>
-            </div>
-        </div>
     </div>
   `,
   init: async (params) => {
     const deptId = params.id;
     if (!deptId) return;
+
+    const portal = document.getElementById('modalPortal');
+    if (portal) {
+      portal.innerHTML = `
+        <!-- MODAL: ADD MEMBER -->
+        <div id="addMemberModal" class="hidden ui-modal-shell">
+            <div class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity" id="closeMemberModalBg"></div>
+            <div class="ui-modal-panel max-w-lg overflow-hidden transform transition-all scale-95 opacity-0 duration-300 translate-y-4" id="memberModalContent">
+                <div class="p-10 lg:p-14">
+                    <div class="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-inner">
+                        <i class="fa-solid fa-user-link"></i>
+                    </div>
+                    <h3 class="text-[28px] font-black text-gray-900 leading-tight mb-2">Integrate Member</h3>
+                    <p class="text-[14px] text-gray-500 font-medium mb-10 italic opacity-70">Attach an institutional identity to this departmental node.</p>
+                    
+                    <form id="addMemberForm" class="space-y-8">
+                      <div class="group">
+                        <label class="ui-label group-hover:text-primary transition-colors">Personnel Email</label>
+                        <input id="memberEmail" type="email" class="ui-input-lg w-full" placeholder="user@kld.edu.ph" required>
+                      </div>
+                      
+                      <div class="group">
+                        <label class="ui-label group-hover:text-primary transition-colors">Authorization Level</label>
+                        <select id="memberRole" class="ui-input-lg w-full cursor-pointer">
+                          <option value="0">TIER-0 &middot; Standard Submitter</option>
+                          <option value="1" selected>TIER-1 &middot; Department Reviewer</option>
+                          <option value="2">TIER-2 &middot; Process Administrator</option>
+                        </select>
+                      </div>
+                    </form>
+                </div>
+                
+                <div class="px-10 py-8 bg-gray-50/50 border-t border-gray-100 flex items-center justify-end gap-4">
+                    <button id="closeMemberModalBtn" class="text-[12px] font-black text-gray-400 p-4 hover:text-gray-900 uppercase tracking-widest transition-all">Discard</button>
+                    <button id="saveMemberBtn" class="ui-button-primary px-10 py-4 text-[15px]">
+                        <i class="fa-solid fa-link text-lg opacity-70"></i> Commit Integration
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: ADD PROCESS -->
+        <div id="addProcessModal" class="hidden ui-modal-shell">
+            <div class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity" id="closeProcessModalBg"></div>
+            <div class="ui-modal-panel max-w-lg overflow-hidden transform transition-all scale-95 opacity-0 duration-300 translate-y-4" id="processModalContent">
+                <div class="p-10 lg:p-14">
+                    <div class="w-16 h-16 bg-emerald-500/10 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-inner">
+                        <i class="fa-solid fa-route"></i>
+                    </div>
+                    <h3 class="text-[28px] font-black text-gray-900 leading-tight mb-2">Scope Protocol</h3>
+                    <p class="text-[14px] text-gray-500 font-medium mb-10 italic opacity-70">Define a new operational framework for this organizational node.</p>
+                    
+                    <form id="addProcessForm" class="space-y-8">
+                      <div class="group">
+                        <label class="ui-label group-hover:text-primary transition-colors">Protocol Nomenclature</label>
+                        <input id="processTitle" type="text" class="ui-input-lg w-full" placeholder="e.g. Clearance Review" required>
+                      </div>
+                    </form>
+                </div>
+                
+                <div class="px-10 py-8 bg-gray-50/50 border-t border-gray-100 flex items-center justify-end gap-4">
+                    <button id="closeProcessModalBtn" class="text-[12px] font-black text-gray-400 p-4 hover:text-gray-900 uppercase tracking-widest transition-all">Abort</button>
+                    <button id="saveProcessBtn" class="ui-button-primary px-10 py-4 text-[15px]">
+                        <i class="fa-solid fa-diagram-project text-lg opacity-70"></i> Commit Protocol
+                    </button>
+                </div>
+            </div>
+        </div>
+      `;
+    }
 
     const roleMap = { 0: 'Submitter', 1: 'Reviewer', 2: 'Administrator', 3: 'Super Admin' };
     const roleIconMap = { 0: 'fa-user-pen', 1: 'fa-user-check', 2: 'fa-user-gear', 3: 'fa-user-shield' };

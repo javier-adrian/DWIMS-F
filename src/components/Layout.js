@@ -135,14 +135,14 @@ export const Layout = (content) => {
           ${content}
         </div>
       </main>
-    </div>
+    </div> <!-- Ends flex-1 content area -->
+  </div> <!-- Ends min-h-screen flex container -->
 
-    <!-- GLOBAL MODAL PORTAL (Outside all transforms) -->
-    <div id="modalPortal" class="relative z-[1000]"></div>
-  </div>
-    <!-- Mobile Overlay -->
-    <div id="mobileOverlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-all duration-500 opacity-0"></div>
-  </div>
+  <!-- GLOBAL MODAL PORTAL (Completely outside flex context to avoid Safari/iOS fixed positioning bugs) -->
+  <div id="modalPortal" class="absolute inset-0 pointer-events-none z-[1000] [&>*]:pointer-events-auto"></div>
+
+  <!-- Mobile Overlay -->
+  <div id="mobileOverlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-all duration-500 opacity-0"></div>
 `;
 };
 

@@ -111,14 +111,14 @@ var eo=Object.defineProperty;var io=(i,t,e)=>t in i?eo(i,t,{enumerable:!0,config
           ${i}
         </div>
       </main>
-    </div>
+    </div> <!-- Ends flex-1 content area -->
+  </div> <!-- Ends min-h-screen flex container -->
 
-    <!-- GLOBAL MODAL PORTAL (Outside all transforms) -->
-    <div id="modalPortal" class="relative z-[1000]"></div>
-  </div>
-    <!-- Mobile Overlay -->
-    <div id="mobileOverlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-all duration-500 opacity-0"></div>
-  </div>
+  <!-- GLOBAL MODAL PORTAL (Completely outside flex context to avoid Safari/iOS fixed positioning bugs) -->
+  <div id="modalPortal" class="absolute inset-0 pointer-events-none z-[1000] [&>*]:pointer-events-auto"></div>
+
+  <!-- Mobile Overlay -->
+  <div id="mobileOverlay" class="hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-all duration-500 opacity-0"></div>
 `};window.addEventListener("click",i=>{i.target.closest("#logoutBtn")&&(sa(),_t("/login"));const e=i.target.closest("#mobileMenuBtn"),s=document.getElementById("mainSidebar"),n=document.getElementById("mobileOverlay");e&&s&&n&&(s.classList.toggle("translate-x-0"),s.classList.toggle("-translate-x-full"),n.classList.toggle("hidden")),i.target===n&&s&&(s.classList.add("-translate-x-full"),s.classList.remove("translate-x-0"),n.classList.add("hidden"))});const us={render:()=>`
     <div class="ui-page-shell max-w-5xl">
       
@@ -1809,76 +1809,77 @@ var eo=Object.defineProperty;var io=(i,t,e)=>t in i?eo(i,t,{enumerable:!0,config
         </div>
       </div>
     </div>
-
-    <!-- MODAL: ADD MEMBER -->
-    <div id="addMemberModal" class="hidden ui-modal-shell">
-        <div class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity" id="closeMemberModalBg"></div>
-        <div class="ui-modal-panel max-w-lg overflow-hidden transform transition-all scale-95 opacity-0 duration-300 translate-y-4" id="memberModalContent">
-            <div class="p-10 lg:p-14">
-                <div class="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-inner">
-                    <i class="fa-solid fa-user-link"></i>
+    </div>
+  `,init:async i=>{const t=i.id;if(!t)return;const e=document.getElementById("modalPortal");e&&(e.innerHTML=`
+        <!-- MODAL: ADD MEMBER -->
+        <div id="addMemberModal" class="hidden ui-modal-shell">
+            <div class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity" id="closeMemberModalBg"></div>
+            <div class="ui-modal-panel max-w-lg overflow-hidden transform transition-all scale-95 opacity-0 duration-300 translate-y-4" id="memberModalContent">
+                <div class="p-10 lg:p-14">
+                    <div class="w-16 h-16 bg-blue-500/10 text-blue-500 rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-inner">
+                        <i class="fa-solid fa-user-link"></i>
+                    </div>
+                    <h3 class="text-[28px] font-black text-gray-900 leading-tight mb-2">Integrate Member</h3>
+                    <p class="text-[14px] text-gray-500 font-medium mb-10 italic opacity-70">Attach an institutional identity to this departmental node.</p>
+                    
+                    <form id="addMemberForm" class="space-y-8">
+                      <div class="group">
+                        <label class="ui-label group-hover:text-primary transition-colors">Personnel Email</label>
+                        <input id="memberEmail" type="email" class="ui-input-lg w-full" placeholder="user@kld.edu.ph" required>
+                      </div>
+                      
+                      <div class="group">
+                        <label class="ui-label group-hover:text-primary transition-colors">Authorization Level</label>
+                        <select id="memberRole" class="ui-input-lg w-full cursor-pointer">
+                          <option value="0">TIER-0 &middot; Standard Submitter</option>
+                          <option value="1" selected>TIER-1 &middot; Department Reviewer</option>
+                          <option value="2">TIER-2 &middot; Process Administrator</option>
+                        </select>
+                      </div>
+                    </form>
                 </div>
-                <h3 class="text-[28px] font-black text-gray-900 leading-tight mb-2">Integrate Member</h3>
-                <p class="text-[14px] text-gray-500 font-medium mb-10 italic opacity-70">Attach an institutional identity to this departmental node.</p>
                 
-                <form id="addMemberForm" class="space-y-8">
-                  <div class="group">
-                    <label class="ui-label group-hover:text-primary transition-colors">Personnel Email</label>
-                    <input id="memberEmail" type="email" class="ui-input-lg w-full" placeholder="user@kld.edu.ph" required>
-                  </div>
-                  
-                  <div class="group">
-                    <label class="ui-label group-hover:text-primary transition-colors">Authorization Level</label>
-                    <select id="memberRole" class="ui-input-lg w-full cursor-pointer">
-                      <option value="0">TIER-0 &middot; Standard Submitter</option>
-                      <option value="1" selected>TIER-1 &middot; Department Reviewer</option>
-                      <option value="2">TIER-2 &middot; Process Administrator</option>
-                    </select>
-                  </div>
-                </form>
-            </div>
-            
-            <div class="px-10 py-8 bg-gray-50/50 border-t border-gray-100 flex items-center justify-end gap-4">
-                <button id="closeMemberModalBtn" class="text-[12px] font-black text-gray-400 p-4 hover:text-gray-900 uppercase tracking-widest transition-all">Discard</button>
-                <button id="saveMemberBtn" class="ui-button-primary px-10 py-4 text-[15px]">
-                    <i class="fa-solid fa-link text-lg opacity-70"></i> Commit Integration
-                </button>
+                <div class="px-10 py-8 bg-gray-50/50 border-t border-gray-100 flex items-center justify-end gap-4">
+                    <button id="closeMemberModalBtn" class="text-[12px] font-black text-gray-400 p-4 hover:text-gray-900 uppercase tracking-widest transition-all">Discard</button>
+                    <button id="saveMemberBtn" class="ui-button-primary px-10 py-4 text-[15px]">
+                        <i class="fa-solid fa-link text-lg opacity-70"></i> Commit Integration
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- MODAL: ADD PROCESS -->
-    <div id="addProcessModal" class="hidden ui-modal-shell">
-        <div class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity" id="closeProcessModalBg"></div>
-        <div class="ui-modal-panel max-w-lg overflow-hidden transform transition-all scale-95 opacity-0 duration-300 translate-y-4" id="processModalContent">
-            <div class="p-10 lg:p-14">
-                <div class="w-16 h-16 bg-emerald-500/10 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-inner">
-                    <i class="fa-solid fa-route"></i>
+        <!-- MODAL: ADD PROCESS -->
+        <div id="addProcessModal" class="hidden ui-modal-shell">
+            <div class="fixed inset-0 bg-black/40 backdrop-blur-md transition-opacity" id="closeProcessModalBg"></div>
+            <div class="ui-modal-panel max-w-lg overflow-hidden transform transition-all scale-95 opacity-0 duration-300 translate-y-4" id="processModalContent">
+                <div class="p-10 lg:p-14">
+                    <div class="w-16 h-16 bg-emerald-500/10 text-emerald-600 rounded-2xl flex items-center justify-center text-3xl mb-8 shadow-inner">
+                        <i class="fa-solid fa-route"></i>
+                    </div>
+                    <h3 class="text-[28px] font-black text-gray-900 leading-tight mb-2">Scope Protocol</h3>
+                    <p class="text-[14px] text-gray-500 font-medium mb-10 italic opacity-70">Define a new operational framework for this organizational node.</p>
+                    
+                    <form id="addProcessForm" class="space-y-8">
+                      <div class="group">
+                        <label class="ui-label group-hover:text-primary transition-colors">Protocol Nomenclature</label>
+                        <input id="processTitle" type="text" class="ui-input-lg w-full" placeholder="e.g. Clearance Review" required>
+                      </div>
+                    </form>
                 </div>
-                <h3 class="text-[28px] font-black text-gray-900 leading-tight mb-2">Scope Protocol</h3>
-                <p class="text-[14px] text-gray-500 font-medium mb-10 italic opacity-70">Define a new operational framework for this organizational node.</p>
                 
-                <form id="addProcessForm" class="space-y-8">
-                  <div class="group">
-                    <label class="ui-label group-hover:text-primary transition-colors">Protocol Nomenclature</label>
-                    <input id="processTitle" type="text" class="ui-input-lg w-full" placeholder="e.g. Clearance Review" required>
-                  </div>
-                </form>
-            </div>
-            
-            <div class="px-10 py-8 bg-gray-50/50 border-t border-gray-100 flex items-center justify-end gap-4">
-                <button id="closeProcessModalBtn" class="text-[12px] font-black text-gray-400 p-4 hover:text-gray-900 uppercase tracking-widest transition-all">Abort</button>
-                <button id="saveProcessBtn" class="ui-button-primary px-10 py-4 text-[15px]">
-                    <i class="fa-solid fa-diagram-project text-lg opacity-70"></i> Commit Protocol
-                </button>
+                <div class="px-10 py-8 bg-gray-50/50 border-t border-gray-100 flex items-center justify-end gap-4">
+                    <button id="closeProcessModalBtn" class="text-[12px] font-black text-gray-400 p-4 hover:text-gray-900 uppercase tracking-widest transition-all">Abort</button>
+                    <button id="saveProcessBtn" class="ui-button-primary px-10 py-4 text-[15px]">
+                        <i class="fa-solid fa-diagram-project text-lg opacity-70"></i> Commit Protocol
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-  `,init:async i=>{const t=i.id;if(!t)return;const e={0:"fa-user-pen",1:"fa-user-check",2:"fa-user-gear",3:"fa-user-shield"},s=async()=>{try{const o=(await D.getDepartments()).find(h=>h.id===t);o&&(document.getElementById("deptName").innerText=o.name,document.getElementById("deptDesc").innerText=o.description||"Functional mandate unassigned.",document.getElementById("deptIdTag").innerText=`UNIT-${t.substring(0,8).toUpperCase()}`);const[r,l]=await Promise.all([D.getProcesses(),D.getDepartmentMembers(t)]),c=(r||[]).filter(h=>h.departmentId===t),d=document.getElementById("processList");c.length===0?d.innerHTML=`
+      `);const s={0:"fa-user-pen",1:"fa-user-check",2:"fa-user-gear",3:"fa-user-shield"},n=async()=>{try{const r=(await D.getDepartments()).find(p=>p.id===t);r&&(document.getElementById("deptName").innerText=r.name,document.getElementById("deptDesc").innerText=r.description||"Functional mandate unassigned.",document.getElementById("deptIdTag").innerText=`UNIT-${t.substring(0,8).toUpperCase()}`);const[l,c]=await Promise.all([D.getProcesses(),D.getDepartmentMembers(t)]),d=(l||[]).filter(p=>p.departmentId===t),u=document.getElementById("processList");d.length===0?u.innerHTML=`
             <div class="py-32 text-center opacity-30 select-none">
                 <i class="fa-solid fa-sitemap text-6xl mb-6"></i>
                 <p class="text-[12px] font-black uppercase tracking-[4px]">No Frameworks Scope</p>
-            </div>`:d.innerHTML=c.map(h=>`
+            </div>`:u.innerHTML=d.map(p=>`
             <li class="px-10 py-8 flex items-center justify-between group hover:bg-white/40 transition-all relative">
               <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-0 bg-primary group-hover:h-12 transition-all rounded-r-full shadow-[0_0_15px_rgba(11,93,59,0.3)]"></div>
               <div class="flex items-center gap-8">
@@ -1886,44 +1887,44 @@ var eo=Object.defineProperty;var io=(i,t,e)=>t in i?eo(i,t,{enumerable:!0,config
                       <i class="fa-solid fa-diagram-project text-2xl opacity-40"></i>
                   </div>
                   <div>
-                    <h4 class="text-[18px] font-black text-gray-900 group-hover:text-primary transition-colors leading-none mb-2">${h.name||h.title||"Untitled Protocol"}</h4>
+                    <h4 class="text-[18px] font-black text-gray-900 group-hover:text-primary transition-colors leading-none mb-2">${p.name||p.title||"Untitled Protocol"}</h4>
                     <div class="flex items-center gap-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group opacity-30"></i> ${h.stepsCount||0} Architected Nodes</span>
+                        <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group opacity-30"></i> ${p.stepsCount||0} Architected Nodes</span>
                         <span class="opacity-10">|</span>
-                        <span class="flex items-center gap-2 ${h.hasTemplate?"text-emerald-500":"text-gray-300"}"><i class="fa-solid ${h.hasTemplate?"fa-file-shield":"fa-file-slash"} opacity-30"></i> ${h.hasTemplate?"Template Synchronized":"Baseline Missing"}</span>
+                        <span class="flex items-center gap-2 ${p.hasTemplate?"text-emerald-500":"text-gray-300"}"><i class="fa-solid ${p.hasTemplate?"fa-file-shield":"fa-file-slash"} opacity-30"></i> ${p.hasTemplate?"Template Synchronized":"Baseline Missing"}</span>
                     </div>
                   </div>
               </div>
-              <a href="#/admin/documents/${h.id}" class="w-12 h-12 rounded-2xl bg-white border border-gray-100 text-gray-300 hover:text-primary hover:border-primary/20 shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
+              <a href="#/admin/documents/${p.id}" class="w-12 h-12 rounded-2xl bg-white border border-gray-100 text-gray-300 hover:text-primary hover:border-primary/20 shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100">
                 <i class="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
               </a>
             </li>
-          `).join("");const u=document.getElementById("membersList");!l||l.length===0?u.innerHTML=`
+          `).join("");const h=document.getElementById("membersList");!c||c.length===0?h.innerHTML=`
             <tr><td class="px-10 py-20 text-center opacity-20">
                 <i class="fa-solid fa-users-slash text-4xl mb-4"></i>
                 <p class="text-[11px] font-black uppercase tracking-widest">Isolated Node</p>
-            </td></tr>`:(u.innerHTML=l.map(h=>{var f,m;const p=((((f=h.firstName)==null?void 0:f[0])||"")+(((m=h.lastName)==null?void 0:m[0])||"U")).toUpperCase(),g=h.role??h.generalRole??0;return`
+            </td></tr>`:(h.innerHTML=c.map(p=>{var m,x;const g=((((m=p.firstName)==null?void 0:m[0])||"")+(((x=p.lastName)==null?void 0:x[0])||"U")).toUpperCase(),f=p.role??p.generalRole??0;return`
               <tr class="group hover:bg-white/40 transition-all">
                 <td class="px-10 py-6">
                     <div class="flex items-center gap-5">
-                        <div class="w-12 h-12 rounded-xl bg-white border border-gray-50 shadow-md flex items-center justify-center text-primary font-black text-[12px] group-hover:scale-110 transition-transform">${p}</div>
+                        <div class="w-12 h-12 rounded-xl bg-white border border-gray-50 shadow-md flex items-center justify-center text-primary font-black text-[12px] group-hover:scale-110 transition-transform">${g}</div>
                         <div>
-                            <p class="text-[14px] font-black text-gray-900 leading-none group-hover:text-primary transition-colors mb-1">${h.firstName||""} ${h.lastName||"Member"}</p>
-                            <p class="text-[10px] font-medium text-gray-400 italic">${h.email||"offline-hub"}</p>
+                            <p class="text-[14px] font-black text-gray-900 leading-none group-hover:text-primary transition-colors mb-1">${p.firstName||""} ${p.lastName||"Member"}</p>
+                            <p class="text-[10px] font-medium text-gray-400 italic">${p.email||"offline-hub"}</p>
                         </div>
                     </div>
                 </td>
                 <td class="px-10 py-6">
                     <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 text-gray-400 font-black text-[9px] uppercase tracking-widest border border-gray-200 group-hover:bg-primary/5 group-hover:text-primary group-hover:border-primary/20 transition-all">
-                        <i class="fa-solid ${e[g]} opacity-30"></i> TIER-${g}
+                        <i class="fa-solid ${s[f]} opacity-30"></i> TIER-${f}
                     </span>
                 </td>
                 <td class="px-10 py-6 text-right">
-                    <button class="remove-role-btn w-10 h-10 rounded-xl bg-white border border-gray-100 text-gray-300 hover:text-red-500 hover:border-red-200 shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100" data-id="${h.roleId||h.id}">
+                    <button class="remove-role-btn w-10 h-10 rounded-xl bg-white border border-gray-100 text-gray-300 hover:text-red-500 hover:border-red-200 shadow-sm flex items-center justify-center transition-all opacity-0 group-hover:opacity-100" data-id="${p.roleId||p.id}">
                         <i class="fa-solid fa-user-minus"></i>
                     </button>
                 </td>
-              </tr>`}).join(""),document.querySelectorAll(".remove-role-btn").forEach(h=>{h.onclick=async()=>{if(confirm("Irreversible Action: Decouple member affiliation from this node?"))try{await D.removeRole(h.dataset.id),await s()}catch(p){alert(p.message)}}}))}catch(a){console.error(a)}};await s();const n=(a,o)=>{const r=document.getElementById(a),l=r.querySelector('div[id$="Content"]');o?(r.classList.remove("hidden"),setTimeout(()=>{l.classList.remove("scale-95","opacity-0","translate-y-4"),l.classList.add("scale-100","opacity-100","translate-y-0")},10)):(l.classList.add("scale-95","opacity-0","translate-y-4"),l.classList.remove("scale-100","opacity-100","translate-y-0"),setTimeout(()=>{var c;r.classList.add("hidden"),(c=r.querySelector("form"))==null||c.reset()},300))};document.getElementById("addMemberBtn").onclick=()=>n("addMemberModal",!0),document.getElementById("closeMemberModalBtn").onclick=()=>n("addMemberModal",!1),document.getElementById("closeMemberModalBg").onclick=()=>n("addMemberModal",!1),document.getElementById("addProcessBtn").onclick=()=>n("addProcessModal",!0),document.getElementById("closeProcessModalBtn").onclick=()=>n("addProcessModal",!1),document.getElementById("closeProcessModalBg").onclick=()=>n("addProcessModal",!1),document.getElementById("saveMemberBtn").onclick=async a=>{const o=a.currentTarget,r=document.getElementById("memberEmail").value,l=document.getElementById("memberRole").value;if(!r)return alert("Hub identifier required.");const c=o.innerHTML;o.disabled=!0,o.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';try{await D.assignRole(r,t,l),n("addMemberModal",!1),await s()}catch(d){alert(d.message)}finally{o.disabled=!1,o.innerHTML=c}},document.getElementById("saveProcessBtn").onclick=async a=>{const o=a.currentTarget,r=document.getElementById("processTitle").value;if(!r)return alert("Protocol nomenclature required.");const l=o.innerHTML;o.disabled=!0,o.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';try{await D.createProcess(r,t),n("addProcessModal",!1),await s()}catch(c){alert(c.message)}finally{o.disabled=!1,o.innerHTML=l}}}},Ds={render:()=>`
+              </tr>`}).join(""),document.querySelectorAll(".remove-role-btn").forEach(p=>{p.onclick=async()=>{if(confirm("Irreversible Action: Decouple member affiliation from this node?"))try{await D.removeRole(p.dataset.id),await n()}catch(g){alert(g.message)}}}))}catch(o){console.error(o)}};await n();const a=(o,r)=>{const l=document.getElementById(o),c=l.querySelector('div[id$="Content"]');r?(l.classList.remove("hidden"),setTimeout(()=>{c.classList.remove("scale-95","opacity-0","translate-y-4"),c.classList.add("scale-100","opacity-100","translate-y-0")},10)):(c.classList.add("scale-95","opacity-0","translate-y-4"),c.classList.remove("scale-100","opacity-100","translate-y-0"),setTimeout(()=>{var d;l.classList.add("hidden"),(d=l.querySelector("form"))==null||d.reset()},300))};document.getElementById("addMemberBtn").onclick=()=>a("addMemberModal",!0),document.getElementById("closeMemberModalBtn").onclick=()=>a("addMemberModal",!1),document.getElementById("closeMemberModalBg").onclick=()=>a("addMemberModal",!1),document.getElementById("addProcessBtn").onclick=()=>a("addProcessModal",!0),document.getElementById("closeProcessModalBtn").onclick=()=>a("addProcessModal",!1),document.getElementById("closeProcessModalBg").onclick=()=>a("addProcessModal",!1),document.getElementById("saveMemberBtn").onclick=async o=>{const r=o.currentTarget,l=document.getElementById("memberEmail").value,c=document.getElementById("memberRole").value;if(!l)return alert("Hub identifier required.");const d=r.innerHTML;r.disabled=!0,r.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';try{await D.assignRole(l,t,c),a("addMemberModal",!1),await n()}catch(u){alert(u.message)}finally{r.disabled=!1,r.innerHTML=d}},document.getElementById("saveProcessBtn").onclick=async o=>{const r=o.currentTarget,l=document.getElementById("processTitle").value;if(!l)return alert("Protocol nomenclature required.");const c=r.innerHTML;r.disabled=!0,r.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';try{await D.createProcess(l,t),a("addProcessModal",!1),await n()}catch(d){alert(d.message)}finally{r.disabled=!1,r.innerHTML=c}}}},Ds={render:()=>`
     <div class="ui-page-shell">
       
       <!-- HEADER -->
