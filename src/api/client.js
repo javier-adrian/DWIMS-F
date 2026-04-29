@@ -217,6 +217,12 @@ export const api = {
     return res.json();
   },
 
+  getAllProcesses: async () => {
+    const res = await fetchWithAuth('/process/all');
+    if (!res.ok) throw new Error('Failed to fetch all processes');
+    return res.json();
+  },
+
   getProcess: async (id) => {
     const res = await fetchWithAuth(`/process/${id}`);
     if (!res.ok) throw new Error('Failed to fetch process');

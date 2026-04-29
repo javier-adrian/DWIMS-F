@@ -102,7 +102,7 @@ export const NewSubmission = {
     let currentFields = [];
 
     try {
-      const processes = await api.getProcesses();
+      const processes = await api.getAllProcesses();
       if (!processes || processes.length === 0) {
         processDropdown.innerHTML = '<option value="">No document protocols found.</option>';
       } else {
