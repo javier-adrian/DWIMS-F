@@ -223,6 +223,11 @@ export const api = {
     return res.json();
   },
 
+  deleteProcess: async (id) => {
+    const res = await fetchWithAuth(`/process/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete process');
+  },
+
   getProcessSteps: async (processId) => {
     const res = await fetchWithAuth(`/process/${processId}/step`);
     if (!res.ok) throw new Error('Failed to fetch process steps');
