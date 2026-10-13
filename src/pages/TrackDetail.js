@@ -1,7 +1,7 @@
 import { api } from '../api/client.js';
 
 const statusLabel = (s) => {
-  const map = { 0: 'Submitted', 1: 'In Review', 2: 'Approved', 3: 'Rejected', 4: 'Cancelled' };
+  const map = { 0: 'Submitted', 1: 'In Review', 2: 'Approved', 3: 'Rejected', 4: 'Cancelled', 5: 'On Hold' };
   return map[s] ?? map[s?.toString()?.toLowerCase()] ?? s ?? '—';
 };
 
@@ -12,7 +12,8 @@ const statusBadge = (s) => {
     1: 'bg-orange-50 text-orange-700 border-orange-200', 'review': 'bg-orange-50 text-orange-700 border-orange-200', 'in review': 'bg-orange-50 text-orange-700 border-orange-200',
     2: 'bg-emerald-50 text-emerald-700 border-emerald-200', 'approved': 'bg-emerald-50 text-emerald-700 border-emerald-200', 'approve': 'bg-emerald-50 text-emerald-700 border-emerald-200',
     3: 'bg-red-50 text-red-700 border-red-200', 'rejected': 'bg-red-50 text-red-700 border-red-200', 'reject': 'bg-red-50 text-red-700 border-red-200',
-    4: 'bg-gray-100 text-gray-600 border-gray-200', 'cancelled': 'bg-gray-100 text-gray-600 border-gray-200',
+    4: 'bg-gray-100 text-gray-600 border-gray-200', 'cancelled': 'bg-gray-100 text-gray-600 border-gray-200', 'cancel': 'bg-gray-100 text-gray-600 border-gray-200',
+    5: 'bg-amber-50 text-amber-700 border-amber-200', 'onhold': 'bg-amber-50 text-amber-700 border-amber-200', 'on hold': 'bg-amber-50 text-amber-700 border-amber-200',
   };
   return map[val] ?? 'bg-gray-100 text-gray-600 border-gray-200';
 };
@@ -23,7 +24,9 @@ const statusIcon = (s) => {
     0: 'fa-rotate', 'submitted': 'fa-rotate',
     1: 'fa-clock', 'review': 'fa-clock', 'in review': 'fa-clock',
     2: 'fa-check', 'approved': 'fa-check', 'approve': 'fa-check',
-    3: 'fa-xmark', 'rejected': 'fa-xmark', 'reject': 'fa-xmark'
+    3: 'fa-xmark', 'rejected': 'fa-xmark', 'reject': 'fa-xmark',
+    4: 'fa-ban', 'cancelled': 'fa-ban', 'cancel': 'fa-ban',
+    5: 'fa-pause', 'onhold': 'fa-pause', 'on hold': 'fa-pause'
   };
   return map[val] ?? 'fa-circle-info';
 };
@@ -106,6 +109,26 @@ export const TrackDetail = {
           </div>
         </div>
 
+        <!-- ATTACHMENTS PANEL -->
+        <div class="ui-section-card rounded-[32px] p-10" id="attachmentsPanel">
+          <div class="flex items-center justify-between gap-3 mb-8 pb-6 border-b border-gray-100/50">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-violet-100 text-violet-600 flex items-center justify-center text-lg shadow-inner"><i class="fa-solid fa-paperclip"></i></div>
+              <h3 class="text-[16px] font-black text-gray-800 uppercase tracking-widest">Attachments</h3>
+            </div>
+            <label class="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-primary text-white text-[12px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:opacity-90 active:scale-95 transition-all">
+              <i class="fa-solid fa-upload"></i> Upload
+              <input type="file" id="attachmentFileInput" multiple class="hidden">
+            </label>
+          </div>
+          <div id="attachmentUploadError" class="hidden mb-6 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 font-bold text-[13px] flex items-center gap-2"></div>
+          <div id="attachmentsList" class="space-y-3">
+            <div class="flex items-center justify-center py-10 text-gray-300 gap-3">
+              <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+            </div>
+          </div>
+        </div>
+
         <div class="grid grid-cols-1 lg:grid-cols-5 gap-12">
           
           <!-- LEFT: DATA ELEMENTS -->
@@ -149,12 +172,14 @@ export const TrackDetail = {
                   ${stepResponses.map((s, idx) => {
         const outcome = s.outcome || s.Outcome;
         const isPending = !(s.completedAt || s.CompletedAt);
-        const colorClass = isPending ? 'amber' : (outcome === 'Reject' || outcome === '3' ? 'red' : 'emerald');
+        const isRejected = outcome === 'Reject' || outcome === '3' || outcome === 3;
+        const isOnHold = outcome === 'OnHold' || outcome === 'onhold' || outcome === '5' || outcome === 5;
+        const colorClass = isPending ? 'amber' : (isRejected ? 'red' : (isOnHold ? 'amber' : 'emerald'));
 
         return `
                       <div class="relative pl-12 group">
                         <!-- BALL -->
-                        <div class="absolute -left-[14px] top-0 w-6 h-6 rounded-full border-4 border-white ${isPending ? 'bg-amber-400 animate-pulse' : (colorClass === 'red' ? 'bg-red-500' : 'bg-emerald-500')} shadow-md z-10 transition-transform group-hover:scale-125"></div>
+                        <div class="absolute -left-[14px] top-0 w-6 h-6 rounded-full border-4 border-white ${isPending ? 'bg-amber-400 animate-pulse' : (colorClass === 'red' ? 'bg-red-500' : (colorClass === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'))} shadow-md z-10 transition-transform group-hover:scale-125"></div>
                         
                         <div class="bg-white/80 p-8 rounded-[24px] border border-gray-100 shadow-sm transition-all group-hover:shadow-lg group-hover:-translate-y-1 group-hover:bg-white relative">
                           <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
@@ -212,6 +237,104 @@ export const TrackDetail = {
           window.URL.revokeObjectURL(url);
         } catch (err) { alert(err.message); }
         finally { btn.disabled = false; btn.innerHTML = originalHTML; }
+      });
+
+      // --- ATTACHMENTS ---
+      const renderAttachments = (attachments) => {
+        const list = document.getElementById('attachmentsList');
+        if (!list) return;
+        if (!attachments || attachments.length === 0) {
+          list.innerHTML = `
+            <div class="py-10 text-center">
+              <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-paperclip text-gray-200 text-2xl"></i>
+              </div>
+              <p class="text-[13px] font-black text-gray-400 uppercase tracking-[2px]">No attachments yet</p>
+            </div>`;
+          return;
+        }
+        list.innerHTML = attachments.map(a => {
+          const attId = a.id || a.Id;
+          const name = a.fileName || a.FileName || 'Attachment';
+          return `
+            <div class="flex items-center justify-between gap-4 p-4 bg-white/60 rounded-2xl border border-gray-100 shadow-sm hover:bg-white transition-all group" data-att-id="${attId}">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-500 flex items-center justify-center flex-shrink-0 text-sm">
+                  <i class="fa-solid fa-file"></i>
+                </div>
+                <span class="text-[13px] font-bold text-gray-700 truncate">${name}</span>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <button class="att-download-btn w-8 h-8 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 flex items-center justify-center transition-all" data-att-id="${attId}" data-att-name="${name}" title="Download">
+                  <i class="fa-solid fa-download text-xs"></i>
+                </button>
+                <button class="att-delete-btn w-8 h-8 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-all" data-att-id="${attId}" title="Delete">
+                  <i class="fa-solid fa-trash text-xs"></i>
+                </button>
+              </div>
+            </div>`;
+        }).join('');
+
+        // Download handlers
+        list.querySelectorAll('.att-download-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const attId = btn.dataset.attId;
+            const attName = btn.dataset.attName;
+            try {
+              const res = await api.downloadAttachment(id, attId);
+              const blob = await res.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = attName;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+            } catch (err) { alert(err.message); }
+          });
+        });
+
+        // Delete handlers
+        list.querySelectorAll('.att-delete-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const attId = btn.dataset.attId;
+            if (!confirm('Delete this attachment?')) return;
+            try {
+              await api.deleteAttachment(id, attId);
+              const updated = await api.getAttachments(id);
+              renderAttachments(updated);
+            } catch (err) { alert(err.message); }
+          });
+        });
+      };
+
+      // Load attachments
+      api.getAttachments(id).then(renderAttachments).catch(() => {
+        const list = document.getElementById('attachmentsList');
+        if (list) list.innerHTML = `<p class="text-center text-[13px] text-red-400 font-bold py-6">Failed to load attachments.</p>`;
+      });
+
+      // Upload handler
+      document.getElementById('attachmentFileInput')?.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+        const errBox = document.getElementById('attachmentUploadError');
+        errBox?.classList.add('hidden');
+        const list = document.getElementById('attachmentsList');
+        const originalHTML = list?.innerHTML;
+        if (list) list.innerHTML = `<div class="flex items-center justify-center py-10 gap-3 text-gray-400 font-bold text-[13px]"><i class="fa-solid fa-spinner fa-spin"></i> Uploading...</div>`;
+        try {
+          await api.uploadAttachments(id, files);
+          const updated = await api.getAttachments(id);
+          renderAttachments(updated);
+        } catch (err) {
+          if (list && originalHTML) list.innerHTML = originalHTML;
+          if (errBox) {
+            errBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${err.message}`;
+            errBox.classList.remove('hidden');
+          }
+        }
+        e.target.value = '';
       });
 
     } catch (err) {

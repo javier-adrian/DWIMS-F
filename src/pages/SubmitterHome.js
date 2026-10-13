@@ -131,7 +131,9 @@ export const SubmitterHome = {
       0: { label: 'Submitted', style: 'bg-blue-50 text-blue-700 border-blue-200', icon: 'fa-rotate' },
       1: { label: 'In Review', style: 'bg-orange-50 text-orange-700 border-orange-200', icon: 'fa-clock' },
       2: { label: 'Approved', style: 'bg-emerald-50 text-emerald-700 border-emerald-200', icon: 'fa-check' },
-      3: { label: 'Rejected', style: 'bg-red-50 text-red-700 border-red-200', icon: 'fa-xmark' }
+      3: { label: 'Rejected', style: 'bg-red-50 text-red-700 border-red-200', icon: 'fa-xmark' },
+      4: { label: 'Cancelled', style: 'bg-gray-100 text-gray-600 border-gray-200', icon: 'fa-ban' },
+      5: { label: 'On Hold', style: 'bg-amber-50 text-amber-700 border-amber-200', icon: 'fa-pause' }
     };
 
     try {
@@ -144,7 +146,7 @@ export const SubmitterHome = {
 
       items.forEach(s => {
         const statusVal = s.status !== undefined ? s.status : s.Status;
-        if (statusVal === 1) underReview++;
+        if (statusVal === 1 || statusVal === 5 || statusVal === 'OnHold') underReview++;
         else if (statusVal === 2 || statusVal === 'Approved' || statusVal === 'Complete') approved++;
         else if (statusVal === 3 || statusVal === 'Rejected') rejected++;
         else underReview++;

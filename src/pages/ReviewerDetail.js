@@ -3,9 +3,10 @@ import { navigateTo } from '../router/index.js';
 
 const STATUS_APPROVE = 2;
 const STATUS_REJECT = 3;
+const STATUS_ON_HOLD = 5;
 
 const statusLabel = (s) => {
-  const map = { 0: 'Submitted', 1: 'In Review', 2: 'Approved', 3: 'Rejected', 4: 'Cancelled' };
+  const map = { 0: 'Submitted', 1: 'In Review', 2: 'Approved', 3: 'Rejected', 4: 'Cancelled', 5: 'On Hold' };
   return map[s] ?? map[s?.toString()?.toLowerCase()] ?? s ?? '—';
 };
 
@@ -16,7 +17,8 @@ const statusBadge = (s) => {
     1: 'bg-orange-50 text-orange-700 border-orange-200', 'review': 'bg-orange-50 text-orange-700 border-orange-200', 'in review': 'bg-orange-50 text-orange-700 border-orange-200',
     2: 'bg-emerald-50 text-emerald-700 border-emerald-200', 'approved': 'bg-emerald-50 text-emerald-700 border-emerald-200', 'approve': 'bg-emerald-50 text-emerald-700 border-emerald-200',
     3: 'bg-red-50 text-red-700 border-red-200', 'rejected': 'bg-red-50 text-red-700 border-red-200', 'reject': 'bg-red-50 text-red-700 border-red-200',
-    4: 'bg-gray-100 text-gray-600 border-gray-200', 'cancelled': 'bg-gray-100 text-gray-600 border-gray-200',
+    4: 'bg-gray-100 text-gray-600 border-gray-200', 'cancelled': 'bg-gray-100 text-gray-600 border-gray-200', 'cancel': 'bg-gray-100 text-gray-600 border-gray-200',
+    5: 'bg-amber-50 text-amber-700 border-amber-200', 'onhold': 'bg-amber-50 text-amber-700 border-amber-200', 'on hold': 'bg-amber-50 text-amber-700 border-amber-200',
   };
   return map[val] ?? 'bg-gray-100 text-gray-600 border-gray-200';
 };
@@ -27,7 +29,9 @@ const statusIcon = (s) => {
     0: 'fa-rotate', 'submitted': 'fa-rotate',
     1: 'fa-clock', 'review': 'fa-clock', 'in review': 'fa-clock',
     2: 'fa-check', 'approved': 'fa-check', 'approve': 'fa-check',
-    3: 'fa-xmark', 'rejected': 'fa-xmark', 'reject': 'fa-xmark'
+    3: 'fa-xmark', 'rejected': 'fa-xmark', 'reject': 'fa-xmark',
+    4: 'fa-ban', 'cancelled': 'fa-ban', 'cancel': 'fa-ban',
+    5: 'fa-pause', 'onhold': 'fa-pause', 'on hold': 'fa-pause'
   };
   return map[val] ?? 'fa-circle-info';
 };
@@ -75,6 +79,7 @@ export const ReviewerDetail = {
       const submittedAt = sub.submittedAt || sub.SubmittedAt;
 
       const isReviewStatus = (status === 1 || status === 'Review' || status === 'review');
+      const isOnHoldStatus = (status === 5 || status === 'OnHold' || status === 'onhold' || status === 'on hold');
       let resolvedStepId = null;
 
       // Attempt to resolve the active step ID
@@ -148,6 +153,44 @@ export const ReviewerDetail = {
                   </div>
               </div>
 
+              <!-- ATTACHMENTS (read-only for reviewer) -->
+              <div class="ui-section-card rounded-[40px] p-12">
+                <h3 class="text-[18px] font-black text-gray-800 uppercase tracking-widest mb-8 pb-6 border-b border-gray-100 flex items-center gap-3">
+                  <i class="fa-solid fa-paperclip text-violet-500"></i> Attachments
+                </h3>
+                <div id="reviewAttachmentsList" class="space-y-3">
+                  <div class="flex items-center justify-center py-10 text-gray-300 gap-3">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl"></i>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ON HOLD STATUS ACTION -->
+              ${isOnHoldStatus ? `
+              <div class="ui-section-card rounded-[40px] border-2 border-amber-500/30 p-12 bg-amber-500/5 relative overflow-hidden" id="onHoldSection">
+                  <div class="absolute top-0 right-0 p-10 opacity-[0.05] text-amber-500 text-9xl -translate-y-10 translate-x-10">
+                      <i class="fa-solid fa-pause"></i>
+                  </div>
+                  
+                  <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 text-amber-700 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/20 mb-6">
+                      <i class="fa-solid fa-pause animate-pulse"></i> Workflow Paused
+                  </div>
+
+                  <h3 class="text-[24px] font-black text-gray-900 tracking-tight mb-3 flex items-center gap-4">
+                    Submission On Hold
+                  </h3>
+                  <p class="text-[14px] text-gray-600 font-medium mb-8 leading-relaxed max-w-xl">
+                    This submission is currently on hold. When you are ready to continue the review workflow, resume the submission below.
+                  </p>
+
+                  <div id="resumeError" class="hidden mb-6 p-4 bg-red-50 text-red-600 rounded-2xl border border-red-100 font-bold text-[13px] flex items-center gap-2"></div>
+
+                  <button id="resumeSubmissionBtn" class="py-5 px-10 rounded-3xl bg-amber-500 hover:bg-amber-600 text-white font-black text-[15px] uppercase tracking-widest shadow-xl shadow-amber-500/20 flex items-center gap-3 transition-all hover:-translate-y-1 active:scale-95">
+                    <i class="fa-solid fa-play"></i> Resume Submission
+                  </button>
+              </div>
+              ` : ''}
+
               <!-- RESPOND SECTION -->
               ${canRespond ? `
               <div class="ui-section-card rounded-[40px] border-2 border-primary/20 p-12 bg-white relative overflow-hidden" id="respondSection">
@@ -164,17 +207,26 @@ export const ReviewerDetail = {
 
                   <div class="mb-10">
                     <label class="block text-[11px] font-black text-gray-400 uppercase tracking-[3px] mb-3 px-2">Decision Remarks</label>
-                    <textarea id="remarksInput" rows="4" placeholder="Enter formal justifications or feedback for the submitter..." class="ui-input-lg w-full resize-none"></textarea>
+                    <textarea id="remarksInput" rows="4" placeholder="Enter formal justifications or feedback for the submitter (required if placing on hold)..." class="ui-input-lg w-full resize-none"></textarea>
+                  </div>
+
+                  <div class="mb-10" id="nextReviewerWrap">
+                    <label class="block text-[11px] font-black text-gray-400 uppercase tracking-[3px] mb-3 px-2">Next Reviewer Email</label>
+                    <input type="email" id="nextReviewerEmailInput" placeholder="nextreviewer@kld.edu.ph" class="ui-input-lg w-full">
+                    <p class="text-[11px] text-gray-400 font-medium mt-2 px-2">Required when approving — designates the next step's assignee. Omit if this is the final step.</p>
                   </div>
 
                   <div id="respondError" class="hidden mb-10 p-6 bg-red-50 text-red-600 rounded-3xl border border-red-100 font-bold flex items-center gap-3"></div>
 
-                  <div class="flex gap-6">
-                    <button id="rejectBtn" class="flex-1 py-6 px-10 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-3xl text-[16px] font-black uppercase tracking-widest transition-all hover:-translate-y-1 active:scale-95 shadow-xl shadow-red-500/10 flex items-center justify-center gap-3">
+                  <div class="flex flex-col sm:flex-row gap-4">
+                    <button id="rejectBtn" class="flex-1 py-5 px-6 border-2 border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-3xl text-[15px] font-black uppercase tracking-widest transition-all hover:-translate-y-1 active:scale-95 shadow-lg shadow-red-500/10 flex items-center justify-center gap-2">
                         <i class="fa-solid fa-xmark"></i> Reject
                     </button>
-                    <button id="approveBtn" class="ui-button-primary flex-1 py-6 px-10 rounded-3xl text-[16px] uppercase tracking-widest">
-                        <i class="fa-solid fa-check-double scale-125"></i> Approve & Sign
+                    <button id="holdBtn" class="flex-1 py-5 px-6 border-2 border-amber-500 text-amber-600 hover:bg-amber-500 hover:text-white rounded-3xl text-[15px] font-black uppercase tracking-widest transition-all hover:-translate-y-1 active:scale-95 shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-pause"></i> Hold
+                    </button>
+                    <button id="approveBtn" class="ui-button-primary flex-1 py-5 px-6 rounded-3xl text-[15px] uppercase tracking-widest">
+                        <i class="fa-solid fa-check-double scale-110"></i> Approve & Sign
                     </button>
                   </div>
               </div>
@@ -192,11 +244,13 @@ export const ReviewerDetail = {
                     ${stepResponses.map(s => {
         const isPending = !(s.completedAt || s.CompletedAt);
         const outcome = s.outcome || s.Outcome;
-        const colorClass = isPending ? 'amber' : (outcome === 'Reject' || outcome === '3' ? 'red' : 'emerald');
+        const isRejected = outcome === 'Reject' || outcome === '3' || outcome === 3;
+        const isOnHold = outcome === 'OnHold' || outcome === 'onhold' || outcome === '5' || outcome === 5;
+        const colorClass = isPending ? 'amber' : (isRejected ? 'red' : (isOnHold ? 'amber' : 'emerald'));
 
         return `
                         <div class="relative pl-10 group">
-                          <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 border-white ${isPending ? 'bg-amber-400 animate-pulse' : (colorClass === 'red' ? 'bg-red-500' : 'bg-emerald-500')} shadow-lg z-10"></div>
+                          <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 border-white ${isPending ? 'bg-amber-400 animate-pulse' : (colorClass === 'red' ? 'bg-red-500' : (colorClass === 'amber' ? 'bg-amber-500' : 'bg-emerald-500'))} shadow-lg z-10"></div>
                           <div class="bg-white/60 p-6 rounded-3xl border border-gray-50 flex flex-col gap-2 group-hover:bg-white transition-all shadow-sm">
                             <span class="text-[13px] font-black text-gray-900 leading-none">${s.stepName || s.StepName}</span>
                             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${s.reviewer || 'PROTOCOL'} &bull; ${s.completedAt ? new Date(s.completedAt).toLocaleDateString() : 'AWAITING'}</span>
@@ -213,28 +267,68 @@ export const ReviewerDetail = {
       `;
 
       // Event Logic
+      if (isOnHoldStatus) {
+        document.getElementById('resumeSubmissionBtn')?.addEventListener('click', async (e) => {
+          const btn = e.currentTarget;
+          const originalHTML = btn.innerHTML;
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Resuming...';
+          const errBox = document.getElementById('resumeError');
+          errBox?.classList.add('hidden');
+          try {
+            await api.resumeSubmission(id);
+            navigateTo('/review');
+          } catch (err) {
+            if (errBox) {
+              errBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${err.message}`;
+              errBox.classList.remove('hidden');
+            }
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+          }
+        });
+      }
+
       if (canRespond) {
         const respond = async (outcome) => {
           const remarks = document.getElementById('remarksInput')?.value?.trim();
+          const nextReviewerEmail = document.getElementById('nextReviewerEmailInput')?.value?.trim() || null;
           const errBox = document.getElementById('respondError');
           errBox?.classList.add('hidden');
 
+          if (outcome === STATUS_ON_HOLD && !remarks) {
+            errBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Remarks are required when placing a submission on hold.`;
+            errBox.classList.remove('hidden');
+            return;
+          }
+
           document.getElementById('approveBtn').disabled = true;
           document.getElementById('rejectBtn').disabled = true;
+          const holdBtn = document.getElementById('holdBtn');
+          if (holdBtn) holdBtn.disabled = true;
 
           try {
-            await api.respondToSubmission(id, resolvedStepId, outcome, remarks);
+            await api.respondToSubmission(id, resolvedStepId, outcome, remarks, nextReviewerEmail);
             navigateTo('/review');
           } catch (err) {
             errBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${err.message}`;
             errBox.classList.remove('hidden');
             document.getElementById('approveBtn').disabled = false;
             document.getElementById('rejectBtn').disabled = false;
+            if (holdBtn) holdBtn.disabled = false;
           }
         };
 
+        // Hide next-reviewer field when rejecting or holding (not needed)
+        document.getElementById('rejectBtn')?.addEventListener('click', () => {
+          document.getElementById('nextReviewerWrap')?.classList.add('hidden');
+          respond(STATUS_REJECT);
+        });
+        document.getElementById('holdBtn')?.addEventListener('click', () => {
+          document.getElementById('nextReviewerWrap')?.classList.add('hidden');
+          respond(STATUS_ON_HOLD);
+        });
         document.getElementById('approveBtn')?.addEventListener('click', () => respond(STATUS_APPROVE));
-        document.getElementById('rejectBtn')?.addEventListener('click', () => respond(STATUS_REJECT));
       }
 
       // Download PDF
@@ -254,6 +348,61 @@ export const ReviewerDetail = {
           window.URL.revokeObjectURL(url);
         } catch (err) { alert(err.message); }
         finally { btn.disabled = false; btn.innerHTML = originalHTML; }
+      });
+
+      // --- ATTACHMENTS (read-only) ---
+      const renderReviewAttachments = (attachments) => {
+        const list = document.getElementById('reviewAttachmentsList');
+        if (!list) return;
+        if (!attachments || attachments.length === 0) {
+          list.innerHTML = `
+            <div class="py-10 text-center">
+              <div class="w-14 h-14 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-paperclip text-gray-200 text-xl"></i>
+              </div>
+              <p class="text-[12px] font-black text-gray-400 uppercase tracking-[2px]">No attachments</p>
+            </div>`;
+          return;
+        }
+        list.innerHTML = attachments.map(a => {
+          const attId = a.id || a.Id;
+          const name = a.fileName || a.FileName || 'Attachment';
+          return `
+            <div class="flex items-center justify-between gap-4 p-4 bg-white/60 rounded-2xl border border-gray-100 shadow-sm hover:bg-white transition-all">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-500 flex items-center justify-center flex-shrink-0 text-sm">
+                  <i class="fa-solid fa-file"></i>
+                </div>
+                <span class="text-[13px] font-bold text-gray-700 truncate">${name}</span>
+              </div>
+              <button class="rev-att-download-btn w-8 h-8 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 flex items-center justify-center transition-all" data-att-id="${attId}" data-att-name="${name}" title="Download">
+                <i class="fa-solid fa-download text-xs"></i>
+              </button>
+            </div>`;
+        }).join('');
+
+        list.querySelectorAll('.rev-att-download-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const attId = btn.dataset.attId;
+            const attName = btn.dataset.attName;
+            try {
+              const res = await api.downloadAttachment(id, attId);
+              const blob = await res.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = attName;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+            } catch (err) { alert(err.message); }
+          });
+        });
+      };
+
+      api.getAttachments(id).then(renderReviewAttachments).catch(() => {
+        const list = document.getElementById('reviewAttachmentsList');
+        if (list) list.innerHTML = `<p class="text-center text-[13px] text-red-400 font-bold py-6">Failed to load attachments.</p>`;
       });
 
     } catch (err) {

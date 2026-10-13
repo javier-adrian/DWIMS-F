@@ -58,6 +58,8 @@ export const TrackPending = {
           if (statusNum === 0 || statusNum === 1) return { l: 'Pending', c: 'bg-primary/5 text-primary border-primary/10 shadow-sm', i: 'fa-spinner fa-spin' };
           if (statusNum === 2) return { l: 'Complete', c: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 shadow-sm', i: 'fa-check-double' };
           if (statusNum === 3) return { l: 'Rejected', c: 'bg-red-500/10 text-red-600 border-red-500/20 shadow-sm', i: 'fa-shield-xmark' };
+          if (statusNum === 4) return { l: 'Cancelled', c: 'bg-gray-100 text-gray-500 border-gray-200 shadow-sm', i: 'fa-ban' };
+          if (statusNum === 5) return { l: 'On Hold', c: 'bg-amber-500/10 text-amber-600 border-amber-500/20 shadow-sm', i: 'fa-pause' };
           return { l: 'Archived', c: 'bg-gray-100 text-gray-400 border-gray-200', i: 'fa-box-archive' };
         };
 

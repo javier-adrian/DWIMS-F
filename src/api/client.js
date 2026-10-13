@@ -172,14 +172,40 @@ export const api = {
     return res.json();
   },
 
-  respondToSubmission: async (submissionId, stepId, outcome, remarks) => {
+  respondToSubmission: async (submissionId, stepId, outcome, remarks, nextReviewerEmail = null) => {
     const res = await fetchWithAuth(`/submission/${submissionId}/steps/${stepId}`, {
       method: 'POST',
-      body: JSON.stringify({ outcome, remarks: remarks || null })
+      body: JSON.stringify({
+        outcome,
+        remarks: remarks || null,
+        nextReviewerEmail: nextReviewerEmail || null
+      })
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.ErrorDescription || err.Error || 'Failed to respond to submission');
+    }
+    return res;
+  },
+
+  resumeSubmission: async (id) => {
+    const res = await fetchWithAuth(`/submission/${id}/resume`, {
+      method: 'POST'
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.ErrorDescription || err.Error || 'Failed to resume submission');
+    }
+    return res;
+  },
+
+  cancelSubmission: async (id) => {
+    const res = await fetchWithAuth(`/submission/${id}/cancel`, {
+      method: 'POST'
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.ErrorDescription || err.Error || 'Failed to cancel submission');
     }
     return res;
   },
@@ -411,5 +437,53 @@ export const api = {
     });
     if (!res.ok) throw new Error('Document download failed');
     return res.blob();
+  },
+
+  getAttachments: async (submissionId) => {
+    const res = await fetchWithAuth(`/submission/${submissionId}/attachments`);
+    if (!res.ok) throw new Error('Failed to fetch attachments');
+    return res.json();
+  },
+
+  downloadAttachment: async (submissionId, attachmentId) => {
+    const token = getToken();
+    const res = await fetch(`${BASE_URL}/submission/${submissionId}/attachments/${attachmentId}`, {
+      headers: {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      }
+    });
+    if (!res.ok) throw new Error('Failed to download attachment');
+    return res;
+  },
+
+  uploadAttachments: async (submissionId, files) => {
+    const token = getToken();
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append('files', file);
+    }
+    const res = await fetch(`${BASE_URL}/submission/${submissionId}/attachments`, {
+      method: 'POST',
+      headers: {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
+      body: formData
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.ErrorDescription || err.Error || 'Failed to upload attachments');
+    }
+    return res;
+  },
+
+  deleteAttachment: async (submissionId, attachmentId) => {
+    const res = await fetchWithAuth(`/submission/${submissionId}/attachments/${attachmentId}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.ErrorDescription || err.Error || 'Failed to delete attachment');
+    }
+    return res;
   }
 };

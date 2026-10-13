@@ -46,6 +46,11 @@ export const NewSubmission = {
                 <i class="fa-solid fa-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-primary text-lg pointer-events-none group-hover:scale-110 transition-transform"></i>
             </div>
             
+            <div class="w-full max-w-md mb-8">
+              <label class="block text-[11px] font-black text-gray-400 uppercase tracking-[2px] mb-3 px-3">First Reviewer Email <span class="text-primary">*</span></label>
+              <input type="email" id="reviewerEmailInput" placeholder="reviewer@kld.edu.ph" class="ui-input-lg w-full">
+            </div>
+
             <button id="startProcessBtn" disabled class="group ui-button-primary disabled:bg-gray-100 disabled:text-gray-300 disabled:cursor-not-allowed text-[16px] px-14 py-6 rounded-3xl">
               Confirm & Prepare Form <i class="fa-solid fa-arrow-right-long group-hover:translate-x-2 transition-transform"></i>
             </button>
@@ -94,12 +99,14 @@ export const NewSubmission = {
     const submissionForm = document.getElementById('submissionForm');
     const cancelProcessBtn = document.getElementById('cancelProcessBtn');
     const submitBtn = document.getElementById('submitSubmissionBtn');
+    const reviewerEmailInput = document.getElementById('reviewerEmailInput');
 
     const step1Ind = document.getElementById('step1Indicator');
     const step2Ind = document.getElementById('step2Indicator');
 
     let currentProcessId = null;
     let currentFields = [];
+    let firstReviewerEmail = '';
 
     try {
       const processes = await api.getAllProcesses();
@@ -120,6 +127,14 @@ export const NewSubmission = {
 
     startProcessBtn.addEventListener('click', async () => {
       currentProcessId = processDropdown.value;
+      firstReviewerEmail = reviewerEmailInput?.value?.trim() || '';
+      if (!firstReviewerEmail) {
+        reviewerEmailInput?.focus();
+        reviewerEmailInput?.setCustomValidity('Please enter the first reviewer email.');
+        reviewerEmailInput?.reportValidity();
+        return;
+      }
+      reviewerEmailInput?.setCustomValidity('');
       const processName = processDropdown.options[processDropdown.selectedIndex].text;
 
       // Update Step UI
@@ -211,6 +226,7 @@ export const NewSubmission = {
 
       const payload = {
         processId: currentProcessId,
+        firstReviewerEmail: firstReviewerEmail,
         fields: payloadFields
       };
 

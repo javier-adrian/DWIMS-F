@@ -79,13 +79,19 @@ export const ReviewerPending = {
             timeAgo = diffHrs > 0 ? `${diffHrs}h ago` : 'Activated recently';
           }
 
+          const status = r.status ?? r.Status ?? 1;
+          const isOnHold = status === 5 || status === 'OnHold' || status === 'onhold' || status === 'on hold';
+
           return `
-            <div class="ui-card rounded-[32px] transition-all hover:-translate-y-2 hover:shadow-2xl group overflow-hidden flex flex-col justify-between">
+            <div class="ui-card rounded-[32px] transition-all hover:-translate-y-2 hover:shadow-2xl group overflow-hidden flex flex-col justify-between ${isOnHold ? 'border-amber-200/60 bg-amber-50/20' : ''}">
               <!-- TOP SECTION -->
               <div class="p-8 pb-4">
                   <div class="flex items-center justify-between mb-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-amber-500/10 text-amber-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-amber-500/20">
-                        <i class="fa-solid fa-clock-rotate-left"></i> ${timeAgo}
+                    <div class="flex items-center gap-2">
+                      <div class="inline-flex items-center gap-2 px-3 py-1 ${isOnHold ? 'bg-amber-500/15 text-amber-700 border-amber-500/30' : 'bg-amber-500/10 text-amber-600 border-amber-500/20'} rounded-full text-[10px] font-black uppercase tracking-widest border">
+                          <i class="fa-solid ${isOnHold ? 'fa-pause' : 'fa-clock-rotate-left'}"></i> ${isOnHold ? 'On Hold' : timeAgo}
+                      </div>
+                      ${isOnHold ? `<span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">${timeAgo}</span>` : ''}
                     </div>
                     <div class="text-[11px] font-black text-gray-300 uppercase tracking-tighter">TRK-${id.toString().slice(-6).toUpperCase()}</div>
                   </div>
@@ -122,8 +128,8 @@ export const ReviewerPending = {
 
               <!-- ACTION SECTION -->
               <div class="p-8 pt-4">
-                  <button data-id="${id}" class="review-btn ui-button-primary w-full py-5 rounded-2xl text-[15px]">
-                      <i class="fa-solid fa-signature"></i> Review Document
+                  <button data-id="${id}" class="review-btn ${isOnHold ? 'bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/20' : 'ui-button-primary'} w-full py-5 rounded-2xl text-[15px] font-black uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl transition-all">
+                      <i class="fa-solid ${isOnHold ? 'fa-play' : 'fa-signature'}"></i> ${isOnHold ? 'Resume / Review' : 'Review Document'}
                   </button>
               </div>
             </div>
