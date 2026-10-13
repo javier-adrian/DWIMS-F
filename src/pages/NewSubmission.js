@@ -1,4 +1,5 @@
 import { api } from '../api/client.js';
+import { navigateTo } from '../router/index.js';
 
 export const NewSubmission = {
   render: () => `
@@ -7,7 +8,7 @@ export const NewSubmission = {
       <!-- NAVIGATION & HEADER -->
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div>
-          <button id="backBtn" class="group inline-flex items-center gap-3 text-[12px] font-black text-gray-400 hover:text-primary transition-all uppercase tracking-[2px] mb-8">
+          <button type="button" id="backBtn" onclick="window.location.hash = '#/home'" class="group inline-flex items-center gap-3 text-[12px] font-black text-gray-400 hover:text-primary transition-all uppercase tracking-[2px] mb-8 cursor-pointer">
               <i class="fa-solid fa-arrow-left group-hover:-translate-x-1 transition-transform"></i> Back to Dashboard
           </button>
           <h1 class="ui-page-title mb-4">New Submission</h1>
@@ -100,6 +101,11 @@ export const NewSubmission = {
     const cancelProcessBtn = document.getElementById('cancelProcessBtn');
     const submitBtn = document.getElementById('submitSubmissionBtn');
     const reviewerEmailInput = document.getElementById('reviewerEmailInput');
+
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+      backBtn.addEventListener('click', () => navigateTo('/home'));
+    }
 
     const step1Ind = document.getElementById('step1Indicator');
     const step2Ind = document.getElementById('step2Indicator');
