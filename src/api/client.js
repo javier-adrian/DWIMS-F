@@ -160,6 +160,12 @@ export const api = {
     return res.json();
   },
 
+  getSubmissionsReviewed: async (page = 1, pageSize = 50) => {
+    const res = await fetchWithAuth(`/submission/reviewed?page=${page}&pageSize=${pageSize}`);
+    if (!res.ok) throw new Error('Failed to fetch reviewed submissions');
+    return res.json();
+  },
+
   getSubmission: async (id) => {
     const res = await fetchWithAuth(`/submission/${id}`);
     if (!res.ok) throw new Error('Failed to fetch submission details');
@@ -435,7 +441,7 @@ export const api = {
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
-    if (!res.ok) throw new Error('Document download failed');
+    if (!res.ok) throw new Error('Failed to load document');
     return res.blob();
   },
 
@@ -452,8 +458,12 @@ export const api = {
         ...(token ? { 'Authorization': `Bearer ${token}` } : {})
       }
     });
-    if (!res.ok) throw new Error('Failed to download attachment');
+    if (!res.ok) throw new Error('Failed to load attachment');
     return res;
+  },
+
+  getAttachment: async (submissionId, attachmentId) => {
+    return api.downloadAttachment(submissionId, attachmentId);
   },
 
   uploadAttachments: async (submissionId, files) => {

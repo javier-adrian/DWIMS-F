@@ -1,4 +1,5 @@
 import { api } from '../api/client.js';
+import { openFileViewer } from '../components/FileViewerModal.js';
 
 const statusLabel = (s) => {
   const map = { 0: 'Submitted', 1: 'In Review', 2: 'Approved', 3: 'Rejected', 4: 'Cancelled', 5: 'On Hold' };
@@ -97,7 +98,7 @@ export const TrackDetail = {
               <div class="text-[10px] font-black text-gray-400 uppercase tracking-[3px] mb-1">Current Status</div>
               <div class="flex items-center gap-4">
                 ${(status === 2 || status === 'Approved') ? `
-                <button id="downloadPdfBtn" class="w-16 h-16 rounded-2xl bg-white shadow-xl flex items-center justify-center text-primary text-2xl hover:scale-110 active:scale-95 transition-all group/btn" title="Download Document">
+                <button id="downloadPdfBtn" class="w-16 h-16 rounded-2xl bg-white shadow-xl flex items-center justify-center text-primary text-2xl hover:scale-110 active:scale-95 transition-all group/btn" title="View Document">
                    <i class="fa-solid fa-file-pdf group-hover/btn:rotate-12"></i>
                 </button>` : ''}
                 <div class="inline-flex items-center px-10 py-5 rounded-3xl text-[18px] font-black shadow-2xl border-2 border-white/50 ${statusBadge(status)} gap-4 transition-all hover:scale-105 active:scale-95 cursor-default group-hover:shadow-primary/10">
@@ -220,7 +221,7 @@ export const TrackDetail = {
         </div>
       `;
 
-      // Download PDF Event Listener
+      // View PDF Event Listener
       document.getElementById('downloadPdfBtn')?.addEventListener('click', async (e) => {
         const btn = e.currentTarget;
         const originalHTML = btn.innerHTML;
@@ -228,13 +229,12 @@ export const TrackDetail = {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
         try {
           const blob = await api.getSubmissionDocument(id);
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `Submission_${id}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
+          await openFileViewer({
+            title: `Submission_${id}.pdf`,
+            fileName: `Submission_${id}.pdf`,
+            blob,
+            mimeType: 'application/pdf'
+          });
         } catch (err) { alert(err.message); }
         finally { btn.disabled = false; btn.innerHTML = originalHTML; }
       });
@@ -257,16 +257,16 @@ export const TrackDetail = {
           const attId = a.id || a.Id;
           const name = a.fileName || a.FileName || 'Attachment';
           return `
-            <div class="flex items-center justify-between gap-4 p-4 bg-white/60 rounded-2xl border border-gray-100 shadow-sm hover:bg-white transition-all group" data-att-id="${attId}">
-              <div class="flex items-center gap-3 min-w-0">
-                <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-500 flex items-center justify-center flex-shrink-0 text-sm">
+            <div class="flex items-center justify-between gap-4 p-4 bg-white/60 rounded-2xl border border-gray-100 shadow-sm hover:bg-white transition-all group" data-att-id="${attId}" data-att-name="${name}">
+              <div class="flex items-center gap-3 min-w-0 cursor-pointer att-preview-trigger" title="Click to view file">
+                <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-500 flex items-center justify-center flex-shrink-0 text-sm group-hover:scale-105 transition-transform">
                   <i class="fa-solid fa-file"></i>
                 </div>
-                <span class="text-[13px] font-bold text-gray-700 truncate">${name}</span>
+                <span class="text-[13px] font-bold text-gray-700 truncate group-hover:text-primary transition-colors">${name}</span>
               </div>
               <div class="flex items-center gap-2 flex-shrink-0">
-                <button class="att-download-btn w-8 h-8 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 flex items-center justify-center transition-all" data-att-id="${attId}" data-att-name="${name}" title="Download">
-                  <i class="fa-solid fa-download text-xs"></i>
+                <button class="att-view-btn w-8 h-8 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 flex items-center justify-center transition-all" data-att-id="${attId}" data-att-name="${name}" title="View">
+                  <i class="fa-solid fa-eye text-xs"></i>
                 </button>
                 <button class="att-delete-btn w-8 h-8 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-all" data-att-id="${attId}" title="Delete">
                   <i class="fa-solid fa-trash text-xs"></i>
@@ -275,22 +275,35 @@ export const TrackDetail = {
             </div>`;
         }).join('');
 
-        // Download handlers
-        list.querySelectorAll('.att-download-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const attId = btn.dataset.attId;
-            const attName = btn.dataset.attName;
+        // View handlers (opens preview modal without immediate download)
+        list.querySelectorAll('.att-view-btn, .att-preview-trigger').forEach(el => {
+          el.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const attId = el.dataset.attId || el.closest('[data-att-id]')?.dataset?.attId;
+            const attName = el.dataset.attName || el.closest('[data-att-name]')?.dataset?.attName || 'Attachment';
+            if (!attId) return;
+
+            const viewBtn = el.classList.contains('att-view-btn') ? el : el.closest('[data-att-id]')?.querySelector('.att-view-btn');
+            const originalHTML = viewBtn ? viewBtn.innerHTML : null;
+            if (viewBtn) {
+              viewBtn.disabled = true;
+              viewBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>';
+            }
             try {
               const res = await api.downloadAttachment(id, attId);
               const blob = await res.blob();
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = attName;
-              document.body.appendChild(a);
-              a.click();
-              window.URL.revokeObjectURL(url);
+              await openFileViewer({
+                title: attName,
+                fileName: attName,
+                blob
+              });
             } catch (err) { alert(err.message); }
+            finally {
+              if (viewBtn && originalHTML) {
+                viewBtn.disabled = false;
+                viewBtn.innerHTML = originalHTML;
+              }
+            }
           });
         });
 

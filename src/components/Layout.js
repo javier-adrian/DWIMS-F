@@ -3,7 +3,7 @@ import { navigateTo } from '../router/index.js';
 
 const getNavClass = (path) => {
   const currentPath = window.location.hash.slice(1);
-  const isActive = currentPath === path;
+  const isActive = currentPath === path || (path === '/review' && currentPath === '/review?tab=pending');
   return isActive
     ? "flex items-center gap-3 px-4 py-3 text-[13px] font-black bg-[#005825] text-white rounded-xl shadow-lg shadow-green-900/20 transition-all duration-300"
     : "flex items-center gap-3 px-4 py-3 text-[13px] font-bold text-gray-500 hover:bg-green-50 hover:text-[#005825] rounded-xl transition-all duration-300";
@@ -11,7 +11,7 @@ const getNavClass = (path) => {
 
 const getIconClass = (path) => {
   const currentPath = window.location.hash.slice(1);
-  const isActive = currentPath === path;
+  const isActive = currentPath === path || (path === '/review' && currentPath === '/review?tab=pending');
   return isActive ? "text-white" : "text-gray-400 group-hover:text-[#005825]";
 };
 
@@ -61,6 +61,9 @@ export const Layout = (content) => {
           <div class="space-y-1">
             <a href="#/review" class="${getNavClass('/review')} group">
                 <i class="fa-solid fa-stamp w-5 ${getIconClass('/review')} transition-transform group-hover:scale-110"></i> Pending Approvals
+            </a>
+            <a href="#/review?tab=reviewed" class="${getNavClass('/review?tab=reviewed')} group">
+                <i class="fa-solid fa-clock-rotate-left w-5 ${getIconClass('/review?tab=reviewed')} transition-transform group-hover:scale-110"></i> Reviewed History
             </a>
           </div>
           ` : ''}

@@ -1,4 +1,5 @@
 import { api } from '../api/client.js';
+import { openFileViewer } from '../components/FileViewerModal.js';
 import { navigateTo } from '../router/index.js';
 
 const STATUS_APPROVE = 2;
@@ -69,7 +70,12 @@ export const ReviewerDetail = {
     }
 
     try {
-      const sub = await api.getSubmissionToReview(id);
+      let sub;
+      try {
+        sub = await api.getSubmissionToReview(id);
+      } catch (e) {
+        sub = await api.getSubmission(id);
+      }
       const fieldValues = sub.fieldValues || sub.FieldValues || [];
       const stepResponses = sub.stepResponses || sub.StepResponses || [];
       const currentStep = sub.currentStep || sub.CurrentStep;
@@ -122,7 +128,7 @@ export const ReviewerDetail = {
 
             <div class="flex items-center gap-4">
                  ${(status === 2 || status === 'Approved') ? `
-                 <button id="downloadPdfBtn" class="w-16 h-16 rounded-2xl bg-white shadow-xl flex items-center justify-center text-primary text-2xl hover:scale-110 active:scale-95 transition-all group/btn">
+                 <button id="downloadPdfBtn" class="w-16 h-16 rounded-2xl bg-white shadow-xl flex items-center justify-center text-primary text-2xl hover:scale-110 active:scale-95 transition-all group/btn" title="View Document">
                     <i class="fa-solid fa-file-pdf group-hover/btn:rotate-12"></i>
                  </button>` : ''}
                  <div class="inline-flex items-center px-10 py-5 rounded-3xl text-[16px] font-black shadow-xl border-2 border-white/50 ${statusBadge(status)} gap-4">
@@ -231,6 +237,21 @@ export const ReviewerDetail = {
                   </div>
               </div>
               ` : ''}
+
+              <!-- READ-ONLY NOTICE FOR PAST REVIEWS -->
+              ${!canRespond && !isOnHoldStatus ? `
+              <div class="ui-section-card rounded-[40px] p-8 bg-white border border-gray-100 flex items-center gap-5 shadow-sm">
+                <div class="w-14 h-14 rounded-2xl ${(status === 2 || status === 'Approved') ? 'bg-emerald-50 text-emerald-600' : (status === 3 || status === 'Rejected') ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'} flex items-center justify-center text-2xl flex-shrink-0">
+                  <i class="fa-solid ${(status === 2 || status === 'Approved') ? 'fa-circle-check' : (status === 3 || status === 'Rejected') ? 'fa-circle-xmark' : 'fa-circle-info'}"></i>
+                </div>
+                <div>
+                  <h4 class="text-[16px] font-black text-gray-900 tracking-tight mb-1">
+                    ${(status === 2 || status === 'Approved') ? 'Review Completed — Approved' : (status === 3 || status === 'Rejected') ? 'Review Completed — Rejected' : 'Read-Only Submission'}
+                  </h4>
+                  <p class="text-[13px] text-gray-500 font-medium">This submission has already been processed. You can review the details, attachments, and decision history above.</p>
+                </div>
+              </div>
+              ` : ''}
           </div>
 
           <!-- RIGHT: TIMELINE -->
@@ -331,7 +352,7 @@ export const ReviewerDetail = {
         document.getElementById('approveBtn')?.addEventListener('click', () => respond(STATUS_APPROVE));
       }
 
-      // Download PDF
+      // View PDF
       document.getElementById('downloadPdfBtn')?.addEventListener('click', async (e) => {
         const btn = e.currentTarget;
         const originalHTML = btn.innerHTML;
@@ -339,13 +360,12 @@ export const ReviewerDetail = {
         btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
         try {
           const blob = await api.getSubmissionDocument(id);
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `AuditLog_${id}.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
+          await openFileViewer({
+            title: `AuditLog_${id}.pdf`,
+            fileName: `AuditLog_${id}.pdf`,
+            blob,
+            mimeType: 'application/pdf'
+          });
         } catch (err) { alert(err.message); }
         finally { btn.disabled = false; btn.innerHTML = originalHTML; }
       });
@@ -368,34 +388,48 @@ export const ReviewerDetail = {
           const attId = a.id || a.Id;
           const name = a.fileName || a.FileName || 'Attachment';
           return `
-            <div class="flex items-center justify-between gap-4 p-4 bg-white/60 rounded-2xl border border-gray-100 shadow-sm hover:bg-white transition-all">
-              <div class="flex items-center gap-3 min-w-0">
-                <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-500 flex items-center justify-center flex-shrink-0 text-sm">
+            <div class="flex items-center justify-between gap-4 p-4 bg-white/60 rounded-2xl border border-gray-100 shadow-sm hover:bg-white transition-all group" data-att-id="${attId}" data-att-name="${name}">
+              <div class="flex items-center gap-3 min-w-0 cursor-pointer rev-att-preview-trigger" title="Click to view file">
+                <div class="w-9 h-9 rounded-xl bg-violet-50 text-violet-500 flex items-center justify-center flex-shrink-0 text-sm group-hover:scale-105 transition-transform">
                   <i class="fa-solid fa-file"></i>
                 </div>
-                <span class="text-[13px] font-bold text-gray-700 truncate">${name}</span>
+                <span class="text-[13px] font-bold text-gray-700 truncate group-hover:text-primary transition-colors">${name}</span>
               </div>
-              <button class="rev-att-download-btn w-8 h-8 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 flex items-center justify-center transition-all" data-att-id="${attId}" data-att-name="${name}" title="Download">
-                <i class="fa-solid fa-download text-xs"></i>
+              <button class="rev-att-view-btn w-8 h-8 rounded-xl bg-violet-50 text-violet-600 hover:bg-violet-100 flex items-center justify-center transition-all" data-att-id="${attId}" data-att-name="${name}" title="View">
+                <i class="fa-solid fa-eye text-xs"></i>
               </button>
             </div>`;
         }).join('');
 
-        list.querySelectorAll('.rev-att-download-btn').forEach(btn => {
-          btn.addEventListener('click', async () => {
-            const attId = btn.dataset.attId;
-            const attName = btn.dataset.attName;
+        // View handlers (opens preview modal without immediate download)
+        list.querySelectorAll('.rev-att-view-btn, .rev-att-preview-trigger').forEach(el => {
+          el.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const attId = el.dataset.attId || el.closest('[data-att-id]')?.dataset?.attId;
+            const attName = el.dataset.attName || el.closest('[data-att-name]')?.dataset?.attName || 'Attachment';
+            if (!attId) return;
+
+            const viewBtn = el.classList.contains('rev-att-view-btn') ? el : el.closest('[data-att-id]')?.querySelector('.rev-att-view-btn');
+            const originalHTML = viewBtn ? viewBtn.innerHTML : null;
+            if (viewBtn) {
+              viewBtn.disabled = true;
+              viewBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i>';
+            }
             try {
               const res = await api.downloadAttachment(id, attId);
               const blob = await res.blob();
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = attName;
-              document.body.appendChild(a);
-              a.click();
-              window.URL.revokeObjectURL(url);
+              await openFileViewer({
+                title: attName,
+                fileName: attName,
+                blob
+              });
             } catch (err) { alert(err.message); }
+            finally {
+              if (viewBtn && originalHTML) {
+                viewBtn.disabled = false;
+                viewBtn.innerHTML = originalHTML;
+              }
+            }
           });
         });
       };
